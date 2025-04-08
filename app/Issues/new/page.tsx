@@ -1,26 +1,23 @@
 'use client'
 
-import { TextField, TextArea, Button, Callout } from '@radix-ui/themes'
+import { TextField, TextArea, Button, Callout, Text } from '@radix-ui/themes'
 import SimpleMDE from "react-simplemde-editor";
 import "easymde/dist/easymde.min.css";
 import { useForm, Controller } from 'react-hook-form';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { schema } from '@/app/schema';
+import { z } from 'zod';
 
-interface IssueForm {
-    title: string;
-    description: string;
-} // This interface defines the structure of the form data
+type issueform=z.infer<typeof schema>// This interface defines the structure of the form data
 // that will be submitted when the form is submitted.
 
 const page = () => {
     const router = useRouter() // This hook is used to programmatically navigate to different routes in the application.
-    const { register, control, handleSubmit } = useForm<IssueForm>({
-        defaultValues: {
-            title: "",
-            description: "",
-        },
+    const { register, control, handleSubmit,formState: {errors} } = useForm<issueform>({
+        resolver:zodResolver(schema)
     }); // This initializes the form with default values for title and description.
     // The useForm hook from react-hook-form is used to manage the form state and validation.
     const [error, seterror] = useState<string>("") // This state variable is used to store any error messages that may occur during form submission.
@@ -52,6 +49,7 @@ const page = () => {
                     <TextField.Slot>
                     </TextField.Slot>
                 </TextField.Root>
+                {errors.title && <Text >{errors.title.message}</Text>}
                 <Controller // This component is used to control the SimpleMDE editor
                     name="description"
                     control={control}
